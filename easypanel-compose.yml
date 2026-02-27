@@ -1,0 +1,128 @@
+version: "3.9"
+
+# =========================================================
+# ReplyAI — Easypanel Stack
+# Cole este arquivo no Easypanel > Project > + Add Service > Docker Compose
+# IMPORTANTE: Configure todas as variáveis de ambiente no Easypanel UI
+# =========================================================
+
+services:
+
+  # ── PostgreSQL ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-replyai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-replyai_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-replyai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  # ── API (FastAPI) ──────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      APP_ENV: production
+      APP_URL: ${APP_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${APP_URL}/api/v1/integrations/youtube/callback
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PRICE_STARTER: ${STRIPE_PRICE_STARTER}
+      STRIPE_PRICE_PRO: ${STRIPE_PRICE_PRO}
+      STRIPE_PRICE_AGENCY: ${STRIPE_PRICE_AGENCY}
+      ASAAS_API_KEY: ${ASAAS_API_KEY}
+      ASAAS_API_URL: ${ASAAS_API_URL:-https://api.asaas.com/api/v3}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@replyai.com.br}
+      FERNET_KEY: ${FERNET_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: >
+      sh -c "
+        pip install alembic --quiet &&
+        python scripts/seed_plans.py &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+      "
+
+  # ── Celery Worker ──────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      FERNET_KEY: ${FERNET_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info --concurrency=2
+
+  # ── Celery Beat (agendador) ────────────────────────────
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      FERNET_KEY: ${FERNET_KEY}
+    depends_on:
+      - redis
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+
+  # ── Frontend (Next.js) ─────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${APP_URL}
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: ${APP_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

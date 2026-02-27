@@ -1,69 +1,64 @@
-# 🚀 ReplyAI — Deploy no Easypanel (VPS)
+# 🚀 ReplyAI — Deploy no Easypanel
 
 ## Pré-requisitos
 - VPS com Ubuntu 22.04+ (mínimo 2 vCPU / 4GB RAM)
 - Easypanel instalado: `curl -sSL https://easypanel.io/install.sh | sh`
-- Domínio apontando para o IP do VPS (A record)
-- Repositório no GitHub
+- Domínio com **dois subdomínios** apontando para o IP do VPS:
+  - `api.seudominio.com` → IP do VPS
+  - `app.seudominio.com` → IP do VPS
+- (registros A no seu provedor de DNS)
 
 ---
 
-## Passo 1 — Preparar repositório
+## Passo 1 — Conectar o repositório GitHub ao Easypanel
 
-```bash
-# Clone e configure
-git clone https://github.com/SEU_USUARIO/replyai.git
-cd replyai
-
-# Copie os .env
-cp backend/.env.example backend/.env
-cp frontend/.env.local.example frontend/.env.local
-
-# Edite com suas chaves reais
-nano backend/.env
-nano frontend/.env.local
-```
+1. Acesse o painel: `http://SEU_IP:3000`
+2. Clique em **"Projects"** → **"+ New Project"** → nome: `replyai`
+3. Vá em **"Sources"** → conecte sua conta GitHub (autorize o Easypanel)
 
 ---
 
-## Passo 2 — Acessar o Easypanel
+## Passo 2 — Criar o Stack via Docker Compose
 
-Acesse `http://SEU_IP:3000` → faça login → clique em **"Create Project"**
+1. Dentro do projeto **replyai**, clique em **"+ Add Service"**
+2. Escolha **"Docker Compose"**
+3. No campo **"Repository"**, selecione: `MarcilioLeiteSilva/replyai`
+4. No campo **"File Path"**, coloque: `easypanel-compose.yml`
+5. (Easypanel vai clonar o repositório e usar esse arquivo)
 
 ---
 
-## Passo 3 — Criar o Stack
+## Passo 3 — Configurar variáveis de ambiente
 
-1. Clique em **"+ Add Service"** → **"App"**
-2. Escolha **"Docker Compose"** e cole o conteúdo do `docker-compose.prod.yml`
-3. Configure as variáveis de ambiente:
+Clique em cada serviço e adicione as variáveis. Ou use o campo de variáveis globais do stack.
 
-### Variáveis necessárias (Easypanel → Environment):
+### Variáveis obrigatórias:
 
 ```env
-# DB
+# Banco de dados
 POSTGRES_USER=replyai
 POSTGRES_PASSWORD=SENHA_FORTE_AQUI
-POSTGRES_DB=replyai_db
 
-# App
-DATABASE_URL=postgresql://replyai:SENHA_FORTE_AQUI@postgres:5432/replyai_db
-REDIS_URL=redis://redis:6379/0
-SECRET_KEY=GERE_COM: python -c "import secrets; print(secrets.token_hex(32))"
-FRONTEND_URL=https://app.SEUDOMINIO.com
-APP_URL=https://api.SEUDOMINIO.com
+# Gere com: python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=GERE_UMA_SENHA_FORTE_AQUI
+
+# URLs da aplicação
+APP_URL=https://api.seudominio.com
+FRONTEND_URL=https://app.seudominio.com
 
 # OpenAI
 OPENAI_API_KEY=sk-...
 
-# Google
+# Google (para YouTube OAuth)
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
-GOOGLE_REDIRECT_URI=https://api.SEUDOMINIO.com/api/v1/integrations/youtube/callback
 
 # Stripe
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_STARTER=price_...
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_AGENCY=price_...
 
 # Asaas
 ASAAS_API_KEY=$aact_...
@@ -72,81 +67,95 @@ ASAAS_API_URL=https://api.asaas.com/api/v3
 # Mercado Pago
 MP_ACCESS_TOKEN=APP_USR-...
 
-# Email
+# Email (Resend)
 RESEND_API_KEY=re_...
+EMAIL_FROM=noreply@seudominio.com
 
-# Fernet
-FERNET_KEY=GERE_COM: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Fernet (criptografia de tokens OAuth)
+# Gere com: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+FERNET_KEY=GERE_AQUI=
 ```
 
 ---
 
-## Passo 4 — Configurar Domínios & SSL
+## Passo 4 — Configurar domínios e SSL
 
-No Easypanel, para cada serviço:
+No Easypanel, para cada serviço clique em **"Domains"**:
 
 | Serviço | Domínio | Porta |
 |---------|---------|-------|
-| `api` | `api.SEUDOMINIO.com` | 8000 |
-| `frontend` | `app.SEUDOMINIO.com` | 3000 |
+| `api` | `api.seudominio.com` | 8000 |
+| `frontend` | `app.seudominio.com` | 3000 |
 
-✅ Easypanel gera SSL automático com Let's Encrypt.
+✅ O Let's Encrypt é ativado automaticamente pelo Easypanel.
 
 ---
 
-## Passo 5 — Fazer Deploy
+## Passo 5 — Fazer o Deploy
 
-```bash
-# Build e push das imagens (CI/CD vai fazer isso automaticamente)
-docker build -t ghcr.io/SEU_USUARIO/replyai-api:latest ./backend
-docker push ghcr.io/SEU_USUARIO/replyai-api:latest
+1. Clique em **"Deploy"** no stack
+2. O Easypanel vai:
+   - Clonar o repositório GitHub
+   - Buildar os Dockerfiles (backend e frontend)
+   - Subir todos os containers
+3. Acompanhe os logs no painel
 
-docker build -t ghcr.io/SEU_USUARIO/replyai-frontend:latest ./frontend
-docker push ghcr.io/SEU_USUARIO/replyai-frontend:latest
-```
-
-No Easypanel, clique em **"Deploy"** → aguarde os containers subirem.
+> ⏱️ O primeiro build demora ~5-10 min (compilação do Next.js)
 
 ---
 
 ## Passo 6 — Verificar
 
 ```bash
-# Testar API
-curl https://api.SEUDOMINIO.com/health
-# Resposta esperada: {"status":"ok","app":"ReplyAI"}
-
-# Verificar logs
-# Easypanel → Service → Logs
+# Testar API (substitua pelo seu domínio)
+curl https://api.seudominio.com/health
+# Resposta: {"status":"ok","app":"ReplyAI"}
 ```
 
+Acesse `https://app.seudominio.com` — o frontend deve carregar.
+
 ---
 
-## Configurar Webhooks nos Gateways
+## Passo 7 — Configurar Webhooks nos Gateways de Pagamento
 
 ### Stripe
-- Dashboard Stripe → Webhooks → Adicionar endpoint:
-  - URL: `https://api.SEUDOMINIO.com/api/v1/billing/webhook/stripe`
-  - Eventos: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- Dashboard → Webhooks → **Add endpoint**
+- URL: `https://api.seudominio.com/api/v1/billing/webhook/stripe`
+- Eventos: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- Copie o **Webhook Secret** gerado e atualize `STRIPE_WEBHOOK_SECRET` no Easypanel
 
 ### Asaas
-- Dashboard Asaas → Integrações → Webhooks:
-  - URL: `https://api.SEUDOMINIO.com/api/v1/billing/webhook/asaas`
-  - Evento: `PAYMENT_RECEIVED`
+- Dashboard → Integrações → Webhooks
+- URL: `https://api.seudominio.com/api/v1/billing/webhook/asaas`
+- Evento: `PAYMENT_RECEIVED`
 
 ### Mercado Pago
-- Dashboard MP → Suas integrações → Webhooks:
-  - URL: `https://api.SEUDOMINIO.com/api/v1/billing/webhook/mp`
-  - Tipo: `payment`
+- Dashboard → Integrações → Webhooks
+- URL: `https://api.seudominio.com/api/v1/billing/webhook/mp`
+- Tipo: `payment`
 
 ---
 
-## CI/CD Automático (GitHub Actions)
+## Deploy Automático (a cada push no GitHub)
 
-O workflow `.github/workflows/ci.yml` vai:
-1. Rodar testes e lint a cada push
-2. Fazer build das imagens Docker no push para `main`
+No Easypanel:
+1. Stack → **Webhook** → copiar URL do webhook
+2. GitHub → repositório `replyai` → **Settings → Webhooks → Add webhook**
+3. Cole a URL do Easypanel → Content type: `application/json` → **Add webhook**
 
-Para deploy automático no Easypanel, adicione um **Deploy Hook**:
-- Easypanel → Service → Webhooks → Copiar URL
-- GitHub → Settings → Webhooks → Adicionar URL do Easypanel
+A partir daí, cada `git push` ativa o redeploy automático. 🚀
+
+---
+
+## Gerar as chaves necessárias (rodar no Windows/Linux)
+
+```bash
+# SECRET_KEY
+python -c "import secrets; print(secrets.token_hex(32))"
+
+# FERNET_KEY
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+# Ou via pip install se não tiver cryptography:
+pip install cryptography -q && python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
