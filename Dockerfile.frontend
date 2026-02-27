@@ -7,10 +7,7 @@ RUN npm install --legacy-peer-deps
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-<<<<<<< HEAD
 
-=======
->>>>>>> 38b0ac7 (fix: use npm install instead of npm ci in Dockerfile.frontend (no lockfile))
 COPY frontend/ .
 
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
