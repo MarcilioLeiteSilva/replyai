@@ -1,8 +1,9 @@
 FROM node:20-alpine AS deps
 
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+COPY package.json ./
+# Use npm install instead of ci because package-lock.json might be missing
+RUN npm install --legacy-peer-deps
 
 # ── Build ─────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -24,6 +25,8 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 # Usuário não-root
 RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
@@ -37,7 +40,7 @@ USER nextjs
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget -qO- http://localhost:3000 || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget -qO- http://localhost:3000/ || exit 1
 
 CMD ["node", "server.js"]
