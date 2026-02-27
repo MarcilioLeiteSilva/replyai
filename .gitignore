@@ -1,0 +1,53 @@
+# Compiled Python / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# Env vars
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# Tokens / secrets
+token.json
+token.pkl
+client_secret.json
+
+# Node
+node_modules/
+.next/
+out/
+.vercel/
+
+# Docker
+*.tar
+
+# Database / data
+*.db
+*.sqlite3
+data/
+
+# Logs
+*.log
+celerybeat-schedule
+celerybeat.pid
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

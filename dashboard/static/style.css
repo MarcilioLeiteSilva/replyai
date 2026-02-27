@@ -1,0 +1,14 @@
+table {
+    margin-top: 20px;
+    background: white;
+    border-collapse: collapse;
+}
+
+th {
+    background: #eee;
+}
+
+td {
+    font-size: 14px;
+    vertical-align: top;
+}

@@ -1,0 +1,100 @@
+Comandos:
+Desktop
+python "C:\Users\Win11_001\Desktop\Agentes\agente_link_youtube_shorts.py"
+
+
+----------------------------------------------
+(Funcional)
+
+Agentes
+python "C:\Users\Win11_001\Desktop\Agentes\agente_link_youtube_shorts.py"   
+
+
+Agente Visual
+
+python "C:\Users\Win11_001\Desktop\Agente_vusual\agente_link_youtube_shorts.py"
+----------------------------------------------
+
+
+Agentes
+python "C:\Users\Win11_001\Desktop\Agentes\agente_shorts_proxy_rotativo.py"
+
+
+
+python "C:\Users\Win11_001\Desktop\agente_shorts_socks5.py"
+
+
+Proxy
+
+python -m pproxy -l http://127.0.0.1:3128 -r "612d1eabfc34bdac0d7f:da47cea6f752531a:gw.dataimpulse.com:824"
+
+python -m install flask
+
+
+crie
+
+Agente Visual
+
+python "C:\Users\Win11_001\Desktop\Agente_visual\app.py"
+
+
+
+dolphin_agent
+python "C:\Users\Win11_001\Desktop\dolphin_agent\main.py"
+
+cd C:\Users\Win11_001\Desktop\dolphin_agent
+python main.py
+
+study-agent-mvp
+cd C:\Users\Win11_001\Desktop\study-agent-mvp
+
+npm run dev
+
+
+https://youtube.com/shorts/oqf1KAoZF3c
+
+
+
+APIKEY - 
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzdhYTVmM2E0MGMxNzA0ODdlNjk1YzdkMjc5M2Y0MzlkYWE0N2U2MGVhNWY5OWFjYTVkMGRiZWY3MDU5NTExNWMzZTgxMGQ4ZTExODI4NDMiLCJpYXQiOjE3NzAxNDc0OTMuNDE3NTE0LCJuYmYiOjE3NzAxNDc0OTMuNDE3NTE4LCJleHAiOjE3NzI3Mzk0OTMuNDA4ODIsInN1YiI6IjQzNzI2MTkiLCJzY29wZXMiOltdLCJ0ZWFtX2lkIjo0MjgwNjk3LCJ0ZWFtX3BsYW4iOiJzdGFydGVyIiwidGVhbV9wbGFuX2V4cGlyYXRpb24iOjE3NzI3Mjc2NDV9.XYc-r0bkvnAaT903GKaZ1AC5bLnIy-FXOo5xGL2_VWvhAAiiW_ZuAguY-npjizy_fMXiuAOg4yHuxZeFbtNZa67mH_KOHEtmBrBKLRaGTdFcoGUlClujBU9N4JzTgSz9osWQei_1yiSKx0C38cS0krjG2S-4-qyIY6J4FIB0EK2L6C05Vuf6ts-kIjjPQmj0eesTJsQWD0rUsl0Pi3v_KhBFsMUaokFutrLkXgKuIB5dMB-HY4SY6EUxsIVPvvh6sCpmy5P5jceJ1WWb6CRC-0Z1dEBU8sYwFzzkbN5WrWMaketYSjHfgjoOb3-MRxSZYyq0megNMfSClDcECC2grty7SJ5M9-6Z94i3WwyCL47AfWc_BB8fLcUbRVcQnrAUeEa6jcWWaz_pZpq4iMolNf33Be7u3J8NC8Q-oyw3UT5G4FUutPAqlhZ5hiedH50yDU0UZ9_IpUZmKN896zDX1-me1sJqJZRbdXnA58xbnO6K_prqUM8mFEFNZW0CPnzIAXTTTUqzPLPYewduTxhKmhEEMa3N12g_FHsNXohtVcEb9b6vvDyfzQlzAn85RujwKzdjVum6oO9RLARy61x-pURyTfNzfxDEnM0BHL3men5gc3bNbgnqvUqDpeXicpXonGPzqlYhUh5CjPuMTAdpSnIa3JhU446QEB5Oe44oIuU
+
+PROFILE_ID - 739389745  (Marcela BR)
+
+cd C:\Users\Win11_001\Desktop\agente_dolphin_shorts> 
+python agente_dolphin_shorts
+
+
+Ver Ip
+"https://api.ipify.org?format=json"
+
+
+
+PS C:\Users\Win11_001> cd desktop
+PS C:\Users\Win11_001\desktop> cd agente_dolphin_shorts
+PS C:\Users\Win11_001\desktop\agente_dolphin_shorts> python -m src.main
+
+
+
+
+python -m src.main
+
+
+python main.py
+
+
+cd descktop
+
+cd agente-comentarios-ty
+
+
+ChannelId="UCXdss612A2FpMDAalMniSMg"
+
+
+
+python run_oauth.py
+
+python dashboard/app.py
+
+
+python -m uvicorn app.main:app --reload

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Agente YT</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<h1>Painel Agente YouTube</h1>
+
+<div>
+    <p>Status autenticação: 
+        <span id="auth-status" style="color: {{ 'green' if authenticated else 'red' }}">
+            {{ 'Autenticado ✅' if authenticated else 'Não autenticado ⚠️' }}
+        </span>
+    </p>
+    <button id="auth-btn">Autenticar</button>
+</div>
+
+<div>
+    <p>Status Agente: <span id="agent-status">Parado</span></p>
+    <button id="start-btn">Iniciar Agente</button>
+	<button id="stopBtn">Parar Agente</button>
+</div>
+
+<h2>Histórico</h2>
+<ul id="history-list"></ul>
+
+<script src="/static/app.js"></script>
+<script document.getElementById("stopBtn").onclick = async () => {
+  await fetch("/stop", { method: "POST" });
+};></script>
+
+</body>
+</html>

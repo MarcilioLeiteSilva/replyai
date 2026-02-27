@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  api:
+    image: ${REGISTRY}/replyai-api:${TAG:-latest}
+    restart: always
+    env_file: .env.prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        python scripts/seed_plans.py &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+      "
+    labels:
+      - "traefik.enable=true"
+
+  worker:
+    image: ${REGISTRY}/replyai-api:${TAG:-latest}
+    restart: always
+    env_file: .env.prod
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info --concurrency=4
+
+  beat:
+    image: ${REGISTRY}/replyai-api:${TAG:-latest}
+    restart: always
+    env_file: .env.prod
+    depends_on:
+      - redis
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+
+  frontend:
+    image: ${REGISTRY}/replyai-frontend:${TAG:-latest}
+    restart: always
+    env_file: .env.frontend.prod
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  redis_data:

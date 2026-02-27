@@ -1,0 +1,25 @@
+{
+  "youtube": {
+    "channel_id": "UCXdss612A2FpMDAalMniSMg",
+    "max_results": 50
+  },
+
+  "agent": {
+    "max_responses_per_run": 5,
+    "respond_to_questions": true,
+    "respond_to_praise": true,
+    "respond_to_neutral": true
+  },
+
+  "paths": {
+    "data_dir": "data",
+    "responded_file": "responded.json",
+    "credentials_file": "client_secret.json",
+    "token_file": "token.json"
+  },
+
+  "panel": {
+    "enabled": true,
+    "refresh_interval_seconds": 10
+  }
+}
