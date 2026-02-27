@@ -1,9 +1,11 @@
 version: "3.9"
 
 # =========================================================
-# ReplyAI — Easypanel Stack
+# ReplyAI — Easypanel Stack (usa imagens do ghcr.io)
+# As imagens são buildadas automaticamente pelo GitHub Actions
+# a cada push no branch main.
+#
 # Cole este arquivo no Easypanel > Project > + Add Service > Docker Compose
-# IMPORTANTE: Configure todas as variáveis de ambiente no Easypanel UI
 # =========================================================
 
 services:
@@ -33,9 +35,7 @@ services:
 
   # ── API (FastAPI) ──────────────────────────────────────
   api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/marcilioleitesilva/replyai-api:latest
     restart: always
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
@@ -67,17 +67,11 @@ services:
       redis:
         condition: service_started
     command: >
-      sh -c "
-        pip install alembic --quiet &&
-        python scripts/seed_plans.py &&
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
-      "
+      sh -c "python scripts/seed_plans.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
 
   # ── Celery Worker ──────────────────────────────────────
   worker:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/marcilioleitesilva/replyai-api:latest
     restart: always
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
@@ -94,9 +88,7 @@ services:
 
   # ── Celery Beat (agendador) ────────────────────────────
   beat:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/marcilioleitesilva/replyai-api:latest
     restart: always
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-replyai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-replyai_db}
@@ -110,11 +102,7 @@ services:
 
   # ── Frontend (Next.js) ─────────────────────────────────
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${APP_URL}
+    image: ghcr.io/marcilioleitesilva/replyai-frontend:latest
     restart: always
     environment:
       NEXT_PUBLIC_API_URL: ${APP_URL}

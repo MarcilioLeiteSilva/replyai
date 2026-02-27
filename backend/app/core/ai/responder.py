@@ -1,8 +1,6 @@
 from openai import OpenAI
 from typing import Optional
 
-client = OpenAI()
-
 SKIP_CATEGORIES = {"spam", "ofensa"}
 
 
@@ -14,6 +12,7 @@ def generate_reply(
     custom_prompt: Optional[str] = None,
     language: str = "pt-BR",
 ) -> Optional[str]:
+    client = OpenAI()
     if category in SKIP_CATEGORIES:
         return None
 

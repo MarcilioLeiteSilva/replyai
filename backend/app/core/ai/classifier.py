@@ -1,7 +1,5 @@
 from openai import OpenAI
 
-client = OpenAI()
-
 ALLOWED_CATEGORIES = {
     "elogio", "duvida", "critica", "discordancia",
     "ofensa", "spam", "neutro", "pedido_de_conteudo"
@@ -9,6 +7,7 @@ ALLOWED_CATEGORIES = {
 
 
 def classify_comment(comment: str, language: str = "pt-BR") -> str:
+    client = OpenAI()
     prompt = f"""Você é um classificador de comentários para redes sociais.
 
 Classifique o comentário abaixo em UMA das categorias:
