@@ -18,4 +18,5 @@ RUN pip install -r requirements.txt
 
 COPY backend/ .
 
-CMD ["celery", "-A", "app.core.celery_app.celery_app", "beat", "--loglev
+CMD celery -A app.core.celery_app.celery_app beat --loglevel=info
+
