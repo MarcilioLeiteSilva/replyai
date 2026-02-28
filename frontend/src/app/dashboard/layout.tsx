@@ -12,11 +12,13 @@ import { useAuth } from "@/lib/auth";
 
 const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard/agents", icon: MessageSquare, label: "Agente" },
     { href: "/dashboard/integrations", icon: Link2, label: "Integrações" },
-    { href: "/dashboard/comments", icon: MessageSquare, label: "Comentários" },
+    { href: "/dashboard/comments", icon: MessageCircle, label: "Comentários" },
     { href: "/dashboard/billing", icon: CreditCard, label: "Plano & Billing" },
     { href: "/dashboard/settings", icon: Settings, label: "Configurações" },
 ];
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
