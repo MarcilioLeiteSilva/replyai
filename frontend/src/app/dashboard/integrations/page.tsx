@@ -63,8 +63,8 @@ export default function IntegrationsPage() {
                             onClick={p.available ? p.action : undefined}
                             disabled={!p.available || loading}
                             className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-sm font-medium transition-all duration-200 ${p.available
-                                    ? "border-indigo-500/30 hover:border-indigo-500/60 hover:bg-indigo-500/5 text-gray-300"
-                                    : "border-white/5 text-gray-600 cursor-not-allowed"
+                                ? "border-indigo-500/30 hover:border-indigo-500/60 hover:bg-indigo-500/5 text-gray-300"
+                                : "border-white/5 text-gray-600 cursor-not-allowed"
                                 }`}
                         >
                             {p.icon}
@@ -116,7 +116,7 @@ export default function IntegrationsPage() {
                                     <button
                                         title="Configurar agente"
                                         className="p-2 rounded-lg text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
-                                        onClick={() => window.location.href = `/dashboard/integrations/${int.id}/config`}
+                                        onClick={() => window.location.href = `/dashboard/agents`}
                                     >
                                         <Settings size={16} />
                                     </button>
