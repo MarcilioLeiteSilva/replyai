@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     LayoutDashboard, Link2, MessageSquare, Settings,
-    CreditCard, LogOut, MessageCircle, Menu, X
+    CreditCard, LogOut, MessageCircle, Menu, X, HelpCircle
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
@@ -17,6 +17,7 @@ const navItems = [
     { href: "/dashboard/comments", icon: MessageCircle, label: "Comentários" },
     { href: "/dashboard/billing", icon: CreditCard, label: "Plano & Billing" },
     { href: "/dashboard/settings", icon: Settings, label: "Configurações" },
+    { href: "/dashboard/help", icon: HelpCircle, label: "Ajuda & Tutorial" },
 ];
 
 
