@@ -7,6 +7,9 @@ from app.models.user import User, Plan, Subscription
 from app.models.integration import SocialIntegration
 from app.models.comment import Comment, Response
 from typing import List, Dict
+import uuid
+
+from app.schemas.schemas import PlanCreate, PlanUpdate, PlanOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -134,3 +137,72 @@ def get_system_status(admin: User = Depends(get_current_admin_user)):
         "celery_workers": worker_status,
         "scheduler": "active" if worker_status == "online" else "inactive"
     }
+
+@router.get("/plans", response_model=List[PlanOut])
+def get_plans(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    return db.query(Plan).all()
+
+@router.post("/plans", response_model=PlanOut)
+def create_plan(
+    plan_in: PlanCreate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    existing = db.query(Plan).filter(Plan.slug == plan_in.slug).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Plano com este slug já existe")
+    
+    plan = Plan(
+        id=str(uuid.uuid4()),
+        **plan_in.model_dump()
+    )
+    db.add(plan)
+    db.commit()
+    db.refresh(plan)
+    return plan
+
+@router.patch("/plans/{plan_id}", response_model=PlanOut)
+def update_plan(
+    plan_id: str,
+    plan_in: PlanUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    plan = db.query(Plan).filter(Plan.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+    
+    update_data = plan_in.model_dump(exclude_unset=True)
+    if "slug" in update_data and update_data["slug"] != plan.slug:
+        existing = db.query(Plan).filter(Plan.slug == update_data["slug"]).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Plano com este slug já existe")
+
+    for field, value in update_data.items():
+        setattr(plan, field, value)
+        
+    db.commit()
+    db.refresh(plan)
+    return plan
+
+@router.delete("/plans/{plan_id}")
+def delete_plan(
+    plan_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    plan = db.query(Plan).filter(Plan.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+        
+    users_with_plan = db.query(User).filter(User.plan_id == plan_id).count()
+    if users_with_plan > 0:
+        raise HTTPException(status_code=400, detail="Não é possível excluir um plano com usuários ativos.")
+        
+    db.delete(plan)
+    db.commit()
+    return {"message": "Plano excluído com sucesso"}
+

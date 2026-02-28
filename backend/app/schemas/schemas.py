@@ -72,6 +72,27 @@ class PlanOut(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class PlanCreate(BaseModel):
+    slug: str
+    name: str
+    price_monthly: float = 0.0
+    max_integrations: int = 1
+    max_responses_per_day: int = 20
+    max_personas: int = 1
+    platforms_json: List[str] = []
+    features_json: Dict[str, Any] = {}
+    is_active: bool = True
+
+class PlanUpdate(BaseModel):
+    slug: Optional[str] = None
+    name: Optional[str] = None
+    price_monthly: Optional[float] = None
+    max_integrations: Optional[int] = None
+    max_responses_per_day: Optional[int] = None
+    max_personas: Optional[int] = None
+    platforms_json: Optional[List[str]] = None
+    features_json: Optional[Dict[str, Any]] = None
+    is_active: Optional[bool] = None
 
 # ─── Integration ──────────────────────────────────────────────────────────────
 class IntegrationOut(BaseModel):
