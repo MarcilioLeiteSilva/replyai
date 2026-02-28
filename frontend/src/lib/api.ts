@@ -1,7 +1,13 @@
 import axios from "axios";
 
 const raw_api_url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const API_URL = raw_api_url.trim().replace(/\/$/, "");
+let API_URL = raw_api_url.trim().replace(/\/$/, "");
+
+// Auto-upgrade para HTTPS se o frontend estiver em HTTPS e a API em HTTP
+if (typeof window !== "undefined" && window.location.protocol === "https:" && API_URL.startsWith("http://")) {
+    API_URL = API_URL.replace("http://", "https://");
+}
+
 
 
 export const api = axios.create({
