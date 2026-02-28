@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
     ShieldCheck, Users, BarChart3, Settings,
-    ArrowLeft, LogOut, MessageCircle, AlertCircle
+    ArrowLeft, LogOut, MessageCircle, AlertCircle,
+    Package, CreditCard, Link2
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -42,11 +43,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </div>
                     </div>
 
-                    <nav className="space-y-1.5">
+                    <nav className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-300px)] pr-2 custom-scrollbar">
                         {[
                             { href: "/admin", icon: BarChart3, label: "Visão Geral" },
                             { href: "/admin/users", icon: Users, label: "Usuários" },
+                            { href: "/admin/plans", icon: Package, label: "Planos" },
+                            { href: "/admin/payments", icon: CreditCard, label: "Pagamentos" },
+                            { href: "/admin/gateways", icon: Link2, label: "Integração Pagamentos" },
                         ].map((item) => {
+
                             const active = pathname === item.href;
                             return (
                                 <Link
