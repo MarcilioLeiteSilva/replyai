@@ -5,7 +5,7 @@ import {
     Cpu, Power, Settings2, Sparkles,
     MessageSquare, ShieldAlert, History,
     CheckCircle2, XCircle, AlertCircle, Save,
-    Youtube, Instagram, Languages, MessageCircle, Clock, Info
+    Youtube, Instagram, Languages, MessageCircle, Clock, Info, Package
 } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
