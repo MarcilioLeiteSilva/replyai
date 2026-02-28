@@ -136,8 +136,9 @@ def youtube_callback(
         # Atualiza tokens
         existing.access_token_enc = encrypt_token(creds.token)
         existing.refresh_token_enc = encrypt_token(creds.refresh_token or "")
-        existing.is_active = False  # AGORA INICIA DESLIGADO POR PADRÃO
+        existing.is_active = False  # INICIA DESLIGADO POR PADRÃO
         db.commit()
+    else:
         integration = SocialIntegration(
             id=str(uuid.uuid4()),
             user_id=user_id,
@@ -147,7 +148,7 @@ def youtube_callback(
             channel_avatar=channel_avatar,
             access_token_enc=encrypt_token(creds.token),
             refresh_token_enc=encrypt_token(creds.refresh_token or ""),
-            is_active=False,  # AGORA INICIA DESLIGADO POR PADRÃO
+            is_active=False,  # INICIA DESLIGADO POR PADRÃO
         )
         db.add(integration)
         db.flush()
