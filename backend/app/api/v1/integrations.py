@@ -160,7 +160,7 @@ def youtube_callback(
         db.add(config)
         db.commit()
 
-    return RedirectResponse(url=f"{settings.FRONTEND_URL}/integrations?connected=youtube")
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/dashboard/integrations?connected=youtube")
 
 
 # ─── Agent Config ─────────────────────────────────────────────────────────────
