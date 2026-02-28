@@ -36,6 +36,19 @@ def get_current_user(
     return user
 
 
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Usuário inativo")
+    return current_user
+
+
+async def get_current_admin_user(current_user: User = Depends(get_current_active_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
+    return current_user
+
+
+
 @router.post("/register", response_model=TokenResponse, status_code=201)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == body.email).first():

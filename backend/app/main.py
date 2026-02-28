@@ -5,7 +5,8 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.core.config import settings
 
 from app.core.database import engine, Base, SessionLocal
-from app.api.v1 import auth, users, integrations, comments, agents, billing
+from app.api.v1 import auth, users, integrations, comments, agents, billing, admin
+
 
 
 def _create_tables_and_seed():
@@ -121,4 +122,6 @@ app.include_router(integrations.router, prefix="/api/v1")
 app.include_router(comments.router, prefix="/api/v1")
 app.include_router(agents.router, prefix="/api/v1")
 app.include_router(billing.router, prefix="/api/v1")
+app.include_router(admin.router, prefix="/api/v1")
+
 
