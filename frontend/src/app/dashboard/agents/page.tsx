@@ -26,8 +26,8 @@ interface AgentConfig {
     approval_required: boolean;
     max_responses_per_run: number;
     max_comments_per_hour: number;
-    max_comments_per_day: number;
     working_hours_start: string;
+
 
     working_hours_end: string;
     working_days: number[];
@@ -288,21 +288,23 @@ export default function AgentsPage() {
                                             <p className="text-[10px] text-gray-500">Máximo de comentários que o agente processará em 60 minutos.</p>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-sm font-medium text-gray-400">Limite Diário</label>
-                                                <span className="text-xs font-black text-indigo-400">{config.max_comments_per_day} interações</span>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                                                        <Package size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Limite do Plano</p>
+                                                        <p className="text-sm text-gray-300 font-medium">Cota Diária de Respostas</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-xl font-black text-indigo-400">Ativo</span>
+                                                    <p className="text-[10px] text-gray-500 uppercase font-bold">Gerenciado pelo Sistema</p>
+                                                </div>
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="10"
-                                                max="1000"
-                                                step="10"
-                                                value={config.max_comments_per_day}
-                                                onChange={(e) => setConfig({ ...config, max_comments_per_day: parseInt(e.target.value) })}
-                                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                                            />
-                                            <p className="text-[10px] text-gray-500">Segurança total para evitar picos de consumo ou spam.</p>
+                                            <p className="text-[10px] text-gray-500 px-2 italic">O teto diário é definido pela sua assinatura administrativa para garantir a integridade do serviço.</p>
                                         </div>
                                     </div>
                                 </div>

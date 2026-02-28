@@ -56,14 +56,9 @@ def run_agent_for_integration(self, integration_id: str):
         if sent_today >= daily_limit_plan:
             return {"status": "plan_daily_limit_reached", "sent_today": sent_today}
 
-        # Verificar Quotas do Agente (Filtro Personalizado)
-        # 1. Quota Diária do Agente
-        agent_daily_limit = config.max_comments_per_day
-        if sent_today >= agent_daily_limit:
-            return {"status": "agent_daily_limit_reached", "sent_today": sent_today}
-
-        # 2. Quota Horária do Agente
+        # Verificar Quotas Horárias (Anti-Spam)
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+
         sent_this_hour = db.query(func.count(CommentResponse.id)).join(Comment).filter(
             Comment.integration_id == integration_id,
             CommentResponse.status == ResponseStatus.sent,
@@ -78,10 +73,10 @@ def run_agent_for_integration(self, integration_id: str):
             # A quota restante é o menor valor entre os limites
             remaining = min(
                 daily_limit_plan - sent_today,
-                agent_daily_limit - sent_today,
                 config.max_comments_per_hour - sent_this_hour
             )
             result = _run_youtube_agent(integration, config, user, db, remaining)
+
 
         else:
             result = {"status": "platform_not_supported"}

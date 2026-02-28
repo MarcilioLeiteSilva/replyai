@@ -102,8 +102,8 @@ class AgentConfigOut(BaseModel):
     skip_offensive: bool
     max_responses_per_run: int
     max_comments_per_hour: int
-    max_comments_per_day: int
     working_hours_start: str
+
     working_hours_end: str
     working_days: List[int]
     auto_mode: bool
@@ -127,8 +127,8 @@ class AgentConfigUpdate(BaseModel):
     skip_offensive: Optional[bool] = None
     max_responses_per_run: Optional[int] = None
     max_comments_per_hour: Optional[int] = None
-    max_comments_per_day: Optional[int] = None
     working_hours_start: Optional[str] = None
+
     working_hours_end: Optional[str] = None
     working_days: Optional[List[int]] = None
     auto_mode: Optional[bool] = None
