@@ -55,3 +55,34 @@ def update_user_status(
     user.is_active = is_active
     db.commit()
     return {"message": f"Usuário {'ativado' if is_active else 'desativado'} com sucesso"}
+
+@router.get("/system-status")
+def get_system_status(admin: User = Depends(get_current_admin_user)):
+    """Verifica a saúde dos serviços essenciais (Celery, Banco, etc)."""
+    from app.core.celery_app import celery_app
+    from sqlalchemy import text
+    from app.core.database import SessionLocal
+    
+    db_status = "offline"
+    try:
+        with SessionLocal() as db:
+            db.execute(text("SELECT 1"))
+            db_status = "online"
+    except Exception:
+        pass
+
+    worker_status = "offline"
+    try:
+        # ping return something like: [{'celery@hostname': {'ok': 'pong'}}] or empty if offline
+        ping = celery_app.control.ping(timeout=1.0)
+        if ping:
+            worker_status = "online"
+    except Exception:
+        pass
+
+    return {
+        "api": "online",
+        "database": db_status,
+        "celery_workers": worker_status,
+        "scheduler": "active" if worker_status == "online" else "inactive"
+    }

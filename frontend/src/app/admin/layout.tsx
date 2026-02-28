@@ -46,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <nav className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-300px)] pr-2 custom-scrollbar">
                         {[
                             { href: "/admin", icon: BarChart3, label: "Visão Geral" },
+                            { href: "/admin/status", icon: ShieldCheck, label: "Status do Sistema" },
                             { href: "/admin/users", icon: Users, label: "Usuários" },
                             { href: "/admin/plans", icon: Package, label: "Planos" },
                             { href: "/admin/payments", icon: CreditCard, label: "Pagamentos" },
