@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
     Users, ShieldCheck, UserCheck, UserX, Crown,
-    Search, Filter, Mail, Calendar, MoreHorizontal
+    Search, Filter, Mail, Calendar, MoreHorizontal, Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,20 +14,26 @@ interface UserInfo {
     is_active: boolean;
     is_admin: boolean;
     created_at: string;
+    plan_id?: string;
     plan?: { name: string };
 }
 
 export default function ManageUsersPage() {
     const [users, setUsers] = useState<UserInfo[]>([]);
+    const [plans, setPlans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
     const fetchData = async () => {
         try {
-            const res = await api.get("/admin/users");
-            setUsers(res.data);
+            const [usersRes, plansRes] = await Promise.all([
+                api.get("/admin/users"),
+                api.get("/billing/plans")
+            ]);
+            setUsers(usersRes.data);
+            setPlans(plansRes.data);
         } catch (error) {
-            console.error("Erro ao carregar usuários", error);
+            console.error("Erro ao carregar dados", error);
         } finally {
             setLoading(false);
         }
@@ -45,6 +51,29 @@ export default function ManageUsersPage() {
             fetchData();
         } catch (error) {
             alert("Erro ao alterar status");
+        }
+    };
+
+    const changeUserPlan = async (userId: string, planId: string) => {
+        if (!confirm("Tem certeza que deseja alterar o plano deste usuário?")) return;
+        try {
+            await api.patch(`/admin/users/${userId}/plan`, null, {
+                params: { plan_id: planId }
+            });
+            fetchData();
+        } catch (error) {
+            alert("Erro ao alterar plano");
+        }
+    };
+
+    const deleteUser = async (userId: string, userName: string) => {
+        if (!confirm(`Tem certeza que deseja excluir O USUÁRIO ${userName} DEFINITIVAMENTE? Isso apagará contas, integrações, limites e faturamentos permanentemente!`)) return;
+        try {
+            await api.delete(`/admin/users/${userId}`);
+            fetchData();
+        } catch (error) {
+            alert("Erro ao excluir usuário");
+            console.error(error);
         }
     };
 
@@ -114,9 +143,16 @@ export default function ManageUsersPage() {
                                             </div>
                                         </td>
                                         <td className="px-8 py-5">
-                                            <span className="text-xs font-bold text-indigo-300 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 capitalize">
-                                                {u.plan?.name || "Free"}
-                                            </span>
+                                            <select
+                                                value={u.plan_id || ""}
+                                                onChange={(e) => changeUserPlan(u.id, e.target.value)}
+                                                className="bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-300 rounded-lg px-2.5 py-1 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                            >
+                                                <option value="" className="bg-gray-900 text-gray-300">Free</option>
+                                                {plans.map(p => (
+                                                    <option key={p.id} value={p.id} className="bg-gray-900 text-gray-300">{p.name}</option>
+                                                ))}
+                                            </select>
                                         </td>
                                         <td className="px-8 py-5">
                                             {u.is_active ? (
@@ -137,16 +173,25 @@ export default function ManageUsersPage() {
                                         </td>
                                         <td className="px-8 py-5 text-right">
                                             {!u.is_admin && (
-                                                <button
-                                                    onClick={() => toggleUserStatus(u.id, u.is_active)}
-                                                    className={`p-2.5 rounded-2xl transition-all shadow-lg ${u.is_active
-                                                            ? "text-red-400 hover:bg-red-500/10 hover:shadow-red-500/5 border border-transparent hover:border-red-500/20"
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => toggleUserStatus(u.id, u.is_active)}
+                                                        className={`p-2.5 rounded-2xl transition-all shadow-lg ${u.is_active
+                                                            ? "text-orange-400 hover:bg-orange-500/10 hover:shadow-orange-500/5 border border-transparent hover:border-orange-500/20"
                                                             : "text-emerald-400 hover:bg-emerald-500/10 hover:shadow-emerald-500/5 border border-transparent hover:border-emerald-500/20"
-                                                        }`}
-                                                    title={u.is_active ? "Bloquear Acesso" : "Desbloquear Acesso"}
-                                                >
-                                                    {u.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
-                                                </button>
+                                                            }`}
+                                                        title={u.is_active ? "Bloquear Acesso" : "Desbloquear Acesso"}
+                                                    >
+                                                        {u.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteUser(u.id, u.name)}
+                                                        className="p-2.5 rounded-2xl transition-all shadow-lg text-red-400 hover:bg-red-500/10 hover:shadow-red-500/5 border border-transparent hover:border-red-500/20"
+                                                        title="Excluir Usuário"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
                                             )}
                                         </td>
                                     </motion.tr>

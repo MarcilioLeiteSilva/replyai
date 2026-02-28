@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from app.core.database import get_db
 from app.api.v1.auth import get_current_admin_user
 from app.models.user import User, Plan, Subscription
@@ -55,6 +55,54 @@ def update_user_status(
     user.is_active = is_active
     db.commit()
     return {"message": f"Usuário {'ativado' if is_active else 'desativado'} com sucesso"}
+
+@router.patch("/users/{user_id}/plan")
+def update_user_plan(
+    user_id: str,
+    plan_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    """Alterar o plano de um usuário."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Verifica se plano existe
+    plan = db.query(Plan).filter(Plan.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+        
+    user.plan_id = plan_id
+    db.commit()
+    return {"message": "Plano do usuário atualizado com sucesso"}
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    """Exclua um usuário e todos os seus dados."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    uid = {"uid": user_id}
+    
+    # Limpeza manual de dados para evitar Constraint Errors
+    db.execute(text("DELETE FROM comment_responses WHERE comment_id IN (SELECT id FROM comments WHERE integration_id IN (SELECT id FROM social_integrations WHERE user_id = :uid))"), uid)
+    db.execute(text("DELETE FROM comments WHERE integration_id IN (SELECT id FROM social_integrations WHERE user_id = :uid)"), uid)
+    db.execute(text("DELETE FROM agent_configs WHERE integration_id IN (SELECT id FROM social_integrations WHERE user_id = :uid)"), uid)
+    db.execute(text("DELETE FROM daily_stats WHERE integration_id IN (SELECT id FROM social_integrations WHERE user_id = :uid)"), uid)
+    db.execute(text("DELETE FROM social_integrations WHERE user_id = :uid"), uid)
+    db.execute(text("DELETE FROM subscriptions WHERE user_id = :uid"), uid)
+    db.execute(text("DELETE FROM notifications WHERE user_id = :uid"), uid)
+    
+    db.delete(user)
+    db.commit()
+    return {"message": "Usuário excluído com sucesso"}
+
 
 @router.get("/system-status")
 def get_system_status(admin: User = Depends(get_current_admin_user)):
