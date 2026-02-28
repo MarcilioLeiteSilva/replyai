@@ -100,9 +100,12 @@ class AgentConfigOut(BaseModel):
     respond_to_criticism: bool
     skip_spam: bool
     skip_offensive: bool
-    max_responses_per_run: int
+    working_hours_start: str
+    working_hours_end: str
+    working_days: List[int]
     auto_mode: bool
     approval_required: bool
+
 
     model_config = {"from_attributes": True}
 
@@ -119,9 +122,12 @@ class AgentConfigUpdate(BaseModel):
     respond_to_criticism: Optional[bool] = None
     skip_spam: Optional[bool] = None
     skip_offensive: Optional[bool] = None
-    max_responses_per_run: Optional[int] = None
+    working_hours_start: Optional[str] = None
+    working_hours_end: Optional[str] = None
+    working_days: Optional[List[int]] = None
     auto_mode: Optional[bool] = None
     approval_required: Optional[bool] = None
+
 
 
 # ─── Comments ─────────────────────────────────────────────────────────────────

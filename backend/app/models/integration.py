@@ -59,6 +59,12 @@ class AgentConfig(Base):
     custom_prompt = Column(Text, nullable=True)   # instrução extra do usuário
     language = Column(String(10), default="pt-BR")
 
+    # Agendamento
+    working_hours_start = Column(String(5), default="00:00") # HH:MM
+    working_hours_end = Column(String(5), default="23:59")   # HH:MM
+    working_days = Column(JSON, default=lambda: [0, 1, 2, 3, 4, 5, 6]) # 0=Segunda, 6=Domingo
+
+
     # Filtros
     blacklist_words = Column(JSON, default=list)        # ["palavra1", "palavra2"]
     whitelist_channels = Column(JSON, default=list)     # responder SOMENTE estes autores

@@ -5,8 +5,9 @@ import {
     Cpu, Power, Settings2, Sparkles,
     MessageSquare, ShieldAlert, History,
     CheckCircle2, XCircle, AlertCircle, Save,
-    Youtube, Instagram, Languages, MessageCircle
+    Youtube, Instagram, Languages, MessageCircle, Clock, Info
 } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Integration {
@@ -23,7 +24,11 @@ interface AgentConfig {
     language: string;
     auto_mode: boolean;
     approval_required: boolean;
+    working_hours_start: string;
+    working_hours_end: string;
+    working_days: number[];
     respond_to_praise: boolean;
+
     respond_to_questions: boolean;
     respond_to_neutral: boolean;
     respond_to_criticism: boolean;
@@ -115,8 +120,8 @@ export default function AgentsPage() {
                     <button
                         onClick={toggleAgent}
                         className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold transition-all shadow-lg ${activeIntegration?.is_active
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"
-                                : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"
+                            : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                             }`}
                     >
                         <Power size={20} />
@@ -135,8 +140,8 @@ export default function AgentsPage() {
                                 key={i.id}
                                 onClick={() => setSelectedId(i.id)}
                                 className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-3 ${selectedId === i.id
-                                        ? "bg-indigo-500/10 border-indigo-500/30 text-white"
-                                        : "bg-gray-900/50 border-white/5 text-gray-400 hover:border-white/10"
+                                    ? "bg-indigo-500/10 border-indigo-500/30 text-white"
+                                    : "bg-gray-900/50 border-white/5 text-gray-400 hover:border-white/10"
                                     }`}
                             >
                                 {i.platform === 'youtube' ? <Youtube size={18} className="text-red-500" /> : <Instagram size={18} className="text-pink-500" />}
@@ -237,8 +242,8 @@ export default function AgentsPage() {
                                             key={item.key}
                                             onClick={() => setConfig({ ...config, [item.key]: !config[item.key as keyof AgentConfig] })}
                                             className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${config[item.key as keyof AgentConfig]
-                                                    ? "bg-indigo-500/5 border-indigo-500/20 text-white"
-                                                    : "bg-black/20 border-white/5 text-gray-500"
+                                                ? "bg-indigo-500/5 border-indigo-500/20 text-white"
+                                                : "bg-black/20 border-white/5 text-gray-500"
                                                 }`}
                                         >
                                             <span className="text-sm font-bold">{item.label}</span>
@@ -252,7 +257,74 @@ export default function AgentsPage() {
                                 </div>
                             </section>
 
+                            {/* Agendamento */}
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg">
+                                        <Clock size={20} />
+                                    </div>
+                                    <h2 className="text-xl font-bold">Janela de Atendimento</h2>
+                                </div>
+
+                                <div className="bg-black/30 border border-white/5 p-8 rounded-3xl space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-gray-400 ml-1">Início das Operações</label>
+                                            <input
+                                                type="time"
+                                                value={config.working_hours_start}
+                                                onChange={(e) => setConfig({ ...config, working_hours_start: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl py-3.5 px-4 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold text-white"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-gray-400 ml-1">Fim das Operações</label>
+                                            <input
+                                                type="time"
+                                                value={config.working_hours_end}
+                                                onChange={(e) => setConfig({ ...config, working_hours_end: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl py-3.5 px-4 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold text-white"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-medium text-gray-400 ml-1">Dias de Funcionamento</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((day, idx) => {
+                                                const isActive = config.working_days.includes(idx);
+                                                return (
+                                                    <button
+                                                        key={day}
+                                                        onClick={() => {
+                                                            const newDays = isActive
+                                                                ? config.working_days.filter(d => d !== idx)
+                                                                : [...config.working_days, idx].sort();
+                                                            setConfig({ ...config, working_days: newDays });
+                                                        }}
+                                                        className={`flex-1 min-w-[60px] py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border ${isActive
+                                                                ? "bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
+                                                                : "bg-black/40 border-white/5 text-gray-500 hover:border-white/20"
+                                                            }`}
+                                                    >
+                                                        {day}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3 p-4 bg-indigo-500/5 rounded-2xl">
+                                        <Info size={16} className="text-indigo-400 mt-0.5" />
+                                        <p className="text-[11px] text-gray-500 leading-relaxed">
+                                            Fora destes horários, o agente entrará em modo de repouso e não processará novos comentários. O fuso horário oficial é <span className="text-indigo-300 font-bold">America/Sao_Paulo</span>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </section>
+
                             {/* Automação */}
+
                             <section className="space-y-6">
                                 <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                                     <div className="p-2 bg-emerald-500/20 text-emerald-500 rounded-lg">
