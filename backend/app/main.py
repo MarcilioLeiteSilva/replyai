@@ -71,17 +71,31 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Proxy Headers (Necessário atrás de Traefik/Easypanel/Nginx)
+# Middleware para lidar com Proxy (HTTPS/Portas)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
-# CORS
+# Forçar esquema HTTPS se estiver atrás de proxy SSL
+@app.middleware("http")
+async def set_https_scheme(request, call_next):
+    if request.headers.get("x-forwarded-proto") == "https":
+        request.scope["scheme"] = "https"
+    return await call_next(request)
+
+# CORS - Configuração correta para Produção
+origins = [
+    settings.FRONTEND_URL,
+    "http://localhost:3000",
+    "https://replyai-replyai-frontend.xc4mw1.easypanel.host", # Seu domínio Easypanel
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporário para depuração; em produção deve ser mais restrito
+    allow_origins=[origin for origin in origins if origin],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 
