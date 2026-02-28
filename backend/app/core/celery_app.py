@@ -21,7 +21,7 @@ celery_app.conf.update(
     beat_schedule={
         "run-all-active-agents": {
             "task": "app.tasks.scheduler.schedule_active_agents",
-            "schedule": 900.0,  # 15 minutos
+            "schedule": 300.0,  # 5 minutos
         },
     },
 )

@@ -17,10 +17,9 @@ def schedule_active_agents():
 
         count = 0
         for integration in active:
-            # Verificar se o agente está em modo automático
-            if integration.agent_config and integration.agent_config.auto_mode:
-                run_agent_for_integration.delay(integration.id)
-                count += 1
+            # Enfileirar sempre que estiver ativo (para buscar novos comentários)
+            run_agent_for_integration.delay(integration.id)
+            count += 1
 
         return {"scheduled": count}
     finally:

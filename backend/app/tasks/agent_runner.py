@@ -208,7 +208,7 @@ def _run_youtube_agent(integration: SocialIntegration, config, user: User, db: S
         db.add(comment)
         db.flush()
 
-        status_val = ResponseStatus.pending if config.approval_required else ResponseStatus.sent
+        status_val = ResponseStatus.sent if config.auto_mode else ResponseStatus.pending
         response = CommentResponse(
             id=str(uuid.uuid4()),
             comment_id=comment.id,
@@ -219,8 +219,8 @@ def _run_youtube_agent(integration: SocialIntegration, config, user: User, db: S
         db.add(response)
         db.flush()
 
-        # Enviar resposta automaticamente se não precisa de aprovação
-        if not config.approval_required:
+        # Enviar resposta automaticamente apenas se Piloto Automático estiver ligado
+        if config.auto_mode:
             try:
                 youtube.comments().insert(
                     part="snippet",
