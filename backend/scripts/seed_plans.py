@@ -4,12 +4,29 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import uuid
 from datetime import datetime, timezone
+from sqlalchemy import text
 from app.core.database import SessionLocal, engine, Base
+
 from app.models import *  # importa todos os modelos
 
 
 def seed_plans():
-    db = SessionLocal()
+    import time
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            db = SessionLocal()
+            # Test connection
+            db.execute(text("SELECT 1"))
+            print(f"✅ Conexão com banco estabelecida (tentativa {i+1})")
+            break
+        except Exception as e:
+            if i == max_retries - 1:
+                print(f"❌ Erro fatal após {max_retries} tentativas: {e}")
+                return
+            print(f"⚠️  Banco não disponível, tentando novamente em 5s... ({e})")
+            time.sleep(5)
+    
     try:
         from app.models.user import Plan, PlanSlug
         plans = [
