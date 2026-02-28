@@ -99,16 +99,26 @@ app.add_middleware(
 
 
 
-# Rotas
+# Rotas de utilidade
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": "ReplyAI API is running",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "app": settings.APP_NAME, "env": settings.APP_ENV}
+
+# Rotas do sistema
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(integrations.router, prefix="/api/v1")
 app.include_router(comments.router, prefix="/api/v1")
 app.include_router(agents.router, prefix="/api/v1")
 app.include_router(billing.router, prefix="/api/v1")
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok", "app": settings.APP_NAME}
 
