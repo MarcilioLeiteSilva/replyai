@@ -100,6 +100,9 @@ class AgentConfigOut(BaseModel):
     respond_to_criticism: bool
     skip_spam: bool
     skip_offensive: bool
+    max_responses_per_run: int
+    max_comments_per_hour: int
+    max_comments_per_day: int
     working_hours_start: str
     working_hours_end: str
     working_days: List[int]
@@ -122,6 +125,9 @@ class AgentConfigUpdate(BaseModel):
     respond_to_criticism: Optional[bool] = None
     skip_spam: Optional[bool] = None
     skip_offensive: Optional[bool] = None
+    max_responses_per_run: Optional[int] = None
+    max_comments_per_hour: Optional[int] = None
+    max_comments_per_day: Optional[int] = None
     working_hours_start: Optional[str] = None
     working_hours_end: Optional[str] = None
     working_days: Optional[List[int]] = None

@@ -40,23 +40,49 @@ def run_agent_for_integration(self, integration_id: str):
         if not config:
             return {"status": "no_config"}
 
-        # Verificar quota diária
-        from datetime import date
+        # Verificar quota diária (Plano)
+        from datetime import date, timedelta
         from sqlalchemy import func
-        today = date.today().isoformat()
+        today_date = date.today()
+        today_str = today_date.isoformat()
+        
         sent_today = db.query(func.count(CommentResponse.id)).join(Comment).filter(
             Comment.integration_id == integration_id,
             CommentResponse.status == ResponseStatus.sent,
-            func.date(CommentResponse.sent_at) == today,
+            func.date(CommentResponse.sent_at) == today_str,
+        ).scalar() or 0
+ 
+        daily_limit_plan = user.plan.max_responses_per_day
+        if sent_today >= daily_limit_plan:
+            return {"status": "plan_daily_limit_reached", "sent_today": sent_today}
+
+        # Verificar Quotas do Agente (Filtro Personalizado)
+        # 1. Quota Diária do Agente
+        agent_daily_limit = config.max_comments_per_day
+        if sent_today >= agent_daily_limit:
+            return {"status": "agent_daily_limit_reached", "sent_today": sent_today}
+
+        # 2. Quota Horária do Agente
+        one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+        sent_this_hour = db.query(func.count(CommentResponse.id)).join(Comment).filter(
+            Comment.integration_id == integration_id,
+            CommentResponse.status == ResponseStatus.sent,
+            CommentResponse.sent_at >= one_hour_ago
         ).scalar() or 0
 
-        daily_limit = user.plan.max_responses_per_day
-        if sent_today >= daily_limit:
-            return {"status": "daily_limit_reached", "sent_today": sent_today}
+        if sent_this_hour >= config.max_comments_per_hour:
+            return {"status": "hourly_limit_reached", "sent_hour": sent_this_hour}
 
         # Obter serviço YouTube
         if integration.platform == Platform.youtube:
-            result = _run_youtube_agent(integration, config, user, db, daily_limit - sent_today)
+            # A quota restante é o menor valor entre os limites
+            remaining = min(
+                daily_limit_plan - sent_today,
+                agent_daily_limit - sent_today,
+                config.max_comments_per_hour - sent_this_hour
+            )
+            result = _run_youtube_agent(integration, config, user, db, remaining)
+
         else:
             result = {"status": "platform_not_supported"}
 

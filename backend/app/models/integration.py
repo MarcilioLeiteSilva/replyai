@@ -75,9 +75,13 @@ class AgentConfig(Base):
     skip_spam = Column(Boolean, default=True)
     skip_offensive = Column(Boolean, default=True)
 
-    # Limites por execução
+    # Limites por execução e períodos
     max_responses_per_run = Column(Integer, default=10)
+    max_comments_per_hour = Column(Integer, default=10)
+    max_comments_per_day = Column(Integer, default=100)
+    
     auto_mode = Column(Boolean, default=True)       # False = aprovação manual
+
     approval_required = Column(Boolean, default=False)
 
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

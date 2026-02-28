@@ -24,7 +24,11 @@ interface AgentConfig {
     language: string;
     auto_mode: boolean;
     approval_required: boolean;
+    max_responses_per_run: number;
+    max_comments_per_hour: number;
+    max_comments_per_day: number;
     working_hours_start: string;
+
     working_hours_end: string;
     working_days: number[];
     respond_to_praise: boolean;
@@ -257,6 +261,53 @@ export default function AgentsPage() {
                                 </div>
                             </section>
 
+                            {/* Limites de Cota */}
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                    <div className="p-2 bg-amber-500/20 text-amber-500 rounded-lg">
+                                        <ShieldAlert size={20} />
+                                    </div>
+                                    <h2 className="text-xl font-bold">Limites & Segurança (Quotas)</h2>
+                                </div>
+
+                                <div className="bg-black/30 border border-white/5 p-8 rounded-3xl space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm font-medium text-gray-400">Limite por Hora</label>
+                                                <span className="text-xs font-black text-indigo-400">{config.max_comments_per_hour} interações</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="50"
+                                                value={config.max_comments_per_hour}
+                                                onChange={(e) => setConfig({ ...config, max_comments_per_hour: parseInt(e.target.value) })}
+                                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                            />
+                                            <p className="text-[10px] text-gray-500">Máximo de comentários que o agente processará em 60 minutos.</p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm font-medium text-gray-400">Limite Diário</label>
+                                                <span className="text-xs font-black text-indigo-400">{config.max_comments_per_day} interações</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="10"
+                                                max="1000"
+                                                step="10"
+                                                value={config.max_comments_per_day}
+                                                onChange={(e) => setConfig({ ...config, max_comments_per_day: parseInt(e.target.value) })}
+                                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                            />
+                                            <p className="text-[10px] text-gray-500">Segurança total para evitar picos de consumo ou spam.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
                             {/* Agendamento */}
                             <section className="space-y-6">
                                 <div className="flex items-center gap-3 border-b border-white/5 pb-4">
@@ -303,8 +354,8 @@ export default function AgentsPage() {
                                                             setConfig({ ...config, working_days: newDays });
                                                         }}
                                                         className={`flex-1 min-w-[60px] py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border ${isActive
-                                                                ? "bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
-                                                                : "bg-black/40 border-white/5 text-gray-500 hover:border-white/20"
+                                                            ? "bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
+                                                            : "bg-black/40 border-white/5 text-gray-500 hover:border-white/20"
                                                             }`}
                                                     >
                                                         {day}
