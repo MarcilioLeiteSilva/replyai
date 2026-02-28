@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.core.config import settings
+
 from app.core.database import engine, Base, SessionLocal
 from app.api.v1 import auth, users, integrations, comments, agents, billing
 
@@ -69,14 +71,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Proxy Headers (Necessário atrás de Traefik/Easypanel/Nginx)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=["*"],  # Temporário para depuração; em produção deve ser mais restrito
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 # Rotas
 app.include_router(auth.router, prefix="/api/v1")

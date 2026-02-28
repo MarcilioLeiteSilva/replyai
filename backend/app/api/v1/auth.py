@@ -9,10 +9,11 @@ from app.core.security import (
     hash_password, verify_password,
     create_access_token, create_refresh_token, decode_token
 )
-from app.models.user import User, Plan, Subscription, SubscriptionStatus
+from app.models.user import User, Plan, Subscription, SubscriptionStatus, PlanSlug
 from app.schemas.schemas import (
     RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, UserOut
 )
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -41,29 +42,34 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email já cadastrado")
 
     # Plano gratuito padrão
-    free_plan = db.query(Plan).filter(Plan.slug == "free").first()
+    free_plan = db.query(Plan).filter(Plan.slug == PlanSlug.free).first()
+
+    if not free_plan:
+        raise HTTPException(
+            status_code=500, 
+            detail="Erro de configuração: Plano padrão 'free' não encontrado no banco de dados."
+        )
 
     user = User(
         id=str(uuid.uuid4()),
         email=body.email,
         name=body.name,
         hashed_password=hash_password(body.password),
-        plan_id=free_plan.id if free_plan else None,
+        plan_id=free_plan.id,
         trial_ends_at=datetime.now(timezone.utc) + timedelta(days=14),
     )
     db.add(user)
 
     # Criar subscription de trial
-    if free_plan:
-        sub = Subscription(
-            id=str(uuid.uuid4()),
-            user_id=user.id,
-            plan_id=free_plan.id,
-            status=SubscriptionStatus.trialing,
-            current_period_start=datetime.now(timezone.utc),
-            current_period_end=datetime.now(timezone.utc) + timedelta(days=14),
-        )
-        db.add(sub)
+    sub = Subscription(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        plan_id=free_plan.id,
+        status=SubscriptionStatus.trialing,
+        current_period_start=datetime.now(timezone.utc),
+        current_period_end=datetime.now(timezone.utc) + timedelta(days=14),
+    )
+    db.add(sub)
 
     db.commit()
     db.refresh(user)
