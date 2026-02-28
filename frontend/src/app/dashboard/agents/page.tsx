@@ -26,6 +26,7 @@ interface AgentConfig {
     approval_required: boolean;
     max_responses_per_run: number;
     max_comments_per_hour: number;
+    response_delay_minutes: number;
     working_hours_start: string;
 
 
@@ -288,7 +289,25 @@ export default function AgentsPage() {
                                             <p className="text-[10px] text-gray-500">Máximo de comentários que o agente processará em 60 minutos.</p>
                                         </div>
 
-                                        <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm font-medium text-gray-400">Intervalo entre Respostas</label>
+                                                <span className="text-xs font-black text-indigo-400">{config.response_delay_minutes} {config.response_delay_minutes === 1 ? 'minuto' : 'minutos'}</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="60"
+                                                value={config.response_delay_minutes ?? 0}
+                                                onChange={(e) => setConfig({ ...config, response_delay_minutes: parseInt(e.target.value) })}
+                                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                            />
+                                            <p className="text-[10px] text-gray-500 flex items-center justify-between">
+                                                <span>Aja natural: Tempo de pausa obrigatório entre cada envio. (0 = sem pausa)</span>
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4 md:col-span-2">
                                             <div className="flex items-center justify-between p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">

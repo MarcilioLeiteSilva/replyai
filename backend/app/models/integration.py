@@ -78,6 +78,7 @@ class AgentConfig(Base):
     # Limites por execução e períodos
     max_responses_per_run = Column(Integer, default=10)
     max_comments_per_hour = Column(Integer, default=10)
+    response_delay_minutes = Column(Integer, default=0)
     
     auto_mode = Column(Boolean, default=True)       # False = aprovação manual
 

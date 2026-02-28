@@ -56,6 +56,21 @@ def run_agent_for_integration(self, integration_id: str):
         if sent_today >= daily_limit_plan:
             return {"status": "plan_daily_limit_reached", "sent_today": sent_today}
 
+        # Verificar Intervalo Fixo (Delay)
+        if config.response_delay_minutes > 0:
+            last_sent = db.query(CommentResponse.sent_at).join(Comment).filter(
+                Comment.integration_id == integration_id,
+                CommentResponse.status == ResponseStatus.sent
+            ).order_by(CommentResponse.sent_at.desc()).first()
+
+            if last_sent and last_sent[0]:
+                last_sent_time = last_sent[0]
+                if last_sent_time.tzinfo is None:
+                    last_sent_time = last_sent_time.replace(tzinfo=timezone.utc)
+                minutes_since = (datetime.now(timezone.utc) - last_sent_time).total_seconds() / 60
+                if minutes_since < config.response_delay_minutes:
+                    return {"status": "delayed", "minutes_since": minutes_since, "required": config.response_delay_minutes}
+
         # Verificar Quotas Horárias (Anti-Spam)
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
 
@@ -112,6 +127,8 @@ def _run_youtube_agent(integration: SocialIntegration, config, user: User, db: S
 
     responded = 0
     max_run = min(config.max_responses_per_run, remaining_quota)
+    if config.response_delay_minutes > 0:
+        max_run = 1  # Se há delay, manda no máximo 1 por vez para não mandar em bolo
 
     # Buscar comentários recentes do canal
     try:

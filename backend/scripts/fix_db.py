@@ -20,7 +20,8 @@ def upgrade_tables():
             "skip_spam BOOLEAN DEFAULT TRUE",
             "skip_offensive BOOLEAN DEFAULT TRUE",
             "max_responses_per_run INTEGER DEFAULT 10",
-            "max_comments_per_hour INTEGER DEFAULT 10"
+            "max_comments_per_hour INTEGER DEFAULT 10",
+            "response_delay_minutes INTEGER DEFAULT 0"
         ]
 
         for col in colunas:
