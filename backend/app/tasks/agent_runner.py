@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.celery_app import celery_app
 from app.core.database import SessionLocal
+from app.core.config import settings
 from app.core.security import decrypt_token
 from app.core.ai.classifier import classify_comment
 from app.core.ai.responder import generate_reply
@@ -119,8 +120,8 @@ def _run_youtube_agent(integration: SocialIntegration, config, user: User, db: S
         token=access_token,
         refresh_token=refresh_token or None,
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=None,
-        client_secret=None,
+        client_id=settings.GOOGLE_CLIENT_ID,
+        client_secret=settings.GOOGLE_CLIENT_SECRET,
     )
 
     youtube = build("youtube", "v3", credentials=creds)
@@ -275,6 +276,8 @@ def send_single_reply(response_id: str):
                 token=decrypt_token(integration.access_token_enc or ""),
                 refresh_token=decrypt_token(integration.refresh_token_enc or "") or None,
                 token_uri="https://oauth2.googleapis.com/token",
+                client_id=settings.GOOGLE_CLIENT_ID,
+                client_secret=settings.GOOGLE_CLIENT_SECRET,
             )
             youtube = build("youtube", "v3", credentials=creds)
             youtube.comments().insert(
