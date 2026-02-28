@@ -137,3 +137,23 @@ def reject_response(
     comment.response.status = ResponseStatus.rejected
     db.commit()
     return {"message": "Resposta rejeitada"}
+
+
+@router.patch("/{comment_id}/edit", status_code=200)
+def edit_response_text(
+    comment_id: str,
+    text: str = Query(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    comment = db.query(Comment).join(SocialIntegration).filter(
+        Comment.id == comment_id,
+        SocialIntegration.user_id == current_user.id,
+    ).first()
+    if not comment or not comment.response:
+        raise HTTPException(status_code=404, detail="Comentário ou resposta não encontrada")
+    
+    comment.response.text = text
+    db.commit()
+    return {"message": "Texto da resposta atualizado", "text": text}
+
