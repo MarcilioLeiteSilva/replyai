@@ -126,6 +126,10 @@ def run_agent():
                 snippet = item["snippet"]["topLevelComment"]["snippet"]
                 text = snippet["textDisplay"]
                 author = snippet.get("authorDisplayName", "Desconhecido")
+                
+                # Ignora se o comentário já possui respostas no YouTube
+                if item["snippet"].get("totalReplyCount", 0) > 0:
+                    continue
 
                 if comment_id in responded:
                     continue

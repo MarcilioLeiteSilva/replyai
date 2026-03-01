@@ -62,6 +62,10 @@ def run_agent():
                 comment_id = item["id"]
                 comment_text = item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
 
+                # Ignora se o comentário já possui respostas no YouTube
+                if item["snippet"].get("totalReplyCount", 0) > 0:
+                    continue
+
                 history = load_history()
                 if any(h["id"] == comment_id for h in history):
                     continue
